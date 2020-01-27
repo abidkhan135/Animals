@@ -12,42 +12,43 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 
-class ListViewModel(applicaiton:Application): AndroidViewModel(applicaiton) {
+class ListViewModel(applicaiton: Application) : AndroidViewModel(applicaiton) {
 
-    val animals by lazy { MutableLiveData<List<Animal>>()}
-    val loadError by lazy {MutableLiveData<Boolean>()}
-    val loading by lazy {MutableLiveData<Boolean>()}
+    val animals by lazy { MutableLiveData<List<Animal>>() }
+    val loadError by lazy { MutableLiveData<Boolean>() }
+    val loading by lazy { MutableLiveData<Boolean>() }
 
     private val disposable = CompositeDisposable()
     private var apiService = AnimalApiService()
 
-    private val prefs= SharedPreferencesHelper(getApplication())
+    private val prefs = SharedPreferencesHelper(getApplication())
     private var invalidApiKey = false
 
     fun refresh() {
         loading.value = true
         invalidApiKey = false
         val key: String? = prefs.getApiKey()
-        if(key.isNullOrEmpty()) {
+        if (key.isNullOrEmpty()) {
             getKey()
         } else {
             getAnimals(key)
         }
         getKey()
     }
+
     fun hardRefresh() {
         loading.value = true
         getKey()
     }
 
-    fun getKey(){
+    fun getKey() {
         disposable.add(
             apiService.getApiKey()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object: DisposableSingleObserver<ApiKey>() {
+                .subscribeWith(object : DisposableSingleObserver<ApiKey>() {
                     override fun onSuccess(key: ApiKey) {
-                        if(key.key.isNullOrEmpty()) {
+                        if (key.key.isNullOrEmpty()) {
                             loadError.value = true
                             loading.value = false
                         } else {
@@ -57,7 +58,7 @@ class ListViewModel(applicaiton:Application): AndroidViewModel(applicaiton) {
                     }
 
                     override fun onError(e: Throwable) {
-                        if(!invalidApiKey) {
+                        if (!invalidApiKey) {
                             invalidApiKey = true
                             getKey()
                         } else {
@@ -72,12 +73,12 @@ class ListViewModel(applicaiton:Application): AndroidViewModel(applicaiton) {
 
     }
 
-    private fun getAnimals(key: String){
+    private fun getAnimals(key: String) {
         disposable.add(
             apiService.getAnimals(key)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(object: DisposableSingleObserver<List<Animal>>() {
+                .subscribeWith(object : DisposableSingleObserver<List<Animal>>() {
                     override fun onSuccess(list: List<Animal>) {
                         loadError.value = false
                         animals.value = list
@@ -86,10 +87,10 @@ class ListViewModel(applicaiton:Application): AndroidViewModel(applicaiton) {
 
                     override fun onError(e: Throwable) {
 
-                            e.printStackTrace()
-                            loading.value = false
-                            animals.value = null
-                            loadError.value = true
+                        e.printStackTrace()
+                        loading.value = false
+                        animals.value = null
+                        loadError.value = true
 
                     }
 
@@ -98,6 +99,7 @@ class ListViewModel(applicaiton:Application): AndroidViewModel(applicaiton) {
 
 
     }
+
     override fun onCleared() {
         super.onCleared()
         disposable.clear()

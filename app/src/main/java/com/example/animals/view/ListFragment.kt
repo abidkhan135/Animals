@@ -20,28 +20,28 @@ import kotlinx.android.synthetic.main.fragment_list.*
 
 class ListFragment : Fragment() {
 
-    private val animalListDataObserver = Observer<List<Animal>>{list ->
+    private val animalListDataObserver = Observer<List<Animal>> { list ->
         list?.let {
-            animalList.visibility= View.VISIBLE
+            animalList.visibility = View.VISIBLE
             listAdapter.updateAnimalList(it)
         }
 
     }
-    private val errorLiveDataObserver = Observer<Boolean> {iserror ->
-        loadError.visibility= if (iserror) View.VISIBLE else View.GONE
+    private val errorLiveDataObserver = Observer<Boolean> { iserror ->
+        loadError.visibility = if (iserror) View.VISIBLE else View.GONE
 
     }
-    private val loadingLiveDataObserver = Observer<Boolean> {isloading ->
-        loadingView.visibility= if (isloading) View.VISIBLE else View.GONE
-        if (isloading){
+    private val loadingLiveDataObserver = Observer<Boolean> { isloading ->
+        loadingView.visibility = if (isloading) View.VISIBLE else View.GONE
+        if (isloading) {
             animalList.visibility = View.GONE
             loadError.visibility = View.GONE
         }
 
     }
 
-    private lateinit var viewModel:ListViewModel
-    private var listAdapter=AnimalListAdapter(arrayListOf())
+    private lateinit var viewModel: ListViewModel
+    private var listAdapter = AnimalListAdapter(arrayListOf())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,15 +53,15 @@ class ListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         viewModel = ViewModelProviders.of(this).get(ListViewModel::class.java)
-        viewModel.animals.observe(this,animalListDataObserver)
-        viewModel.loading.observe(this,loadingLiveDataObserver)
-        viewModel.loadError.observe(this,errorLiveDataObserver)
+        viewModel.animals.observe(this, animalListDataObserver)
+        viewModel.loading.observe(this, loadingLiveDataObserver)
+        viewModel.loadError.observe(this, errorLiveDataObserver)
 
         viewModel.refresh()
 
         animalList.apply {
-            layoutManager = GridLayoutManager(context,2)
-            adapter= listAdapter
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = listAdapter
         }
         refreshlayout.setOnRefreshListener {
             animalList.visibility = View.GONE
